@@ -331,8 +331,36 @@ Peso valorAtual;
    o problema do caixeiro viajante.
    Esta funcao eh inicialmente chamada pela funcao caixeiroViajante */
 void caixeiroAux(Grafo*g, int atual, int numVisitados){
-
-/* Complete o codigo desta funcao */  
+  if (g->numArestas==1 && g->numVertices==1){
+    visitado[atual] = true;
+    melhorValor = g->A[atual]->peso;
+    melhorCiclo[atual] = g->A[atual]->vertice;
+    return;
+  }
+  visitado[atual] = true;
+  ElemLista* elemenAtual = g->A[atual];
+  
+  while (elemenAtual){
+    if (!visitado[elemenAtual->vertice]){
+      valorAtual += elemenAtual->peso;
+      cicloAtual[numVisitados] = elemenAtual->vertice;
+      if (numVisitados == g->numVertices-1){
+        if (arestaExiste(g, elemenAtual->vertice, 0)){
+          valorAtual += pesoAresta(g, elemenAtual->vertice, 0);
+          if (valorAtual < melhorValor){
+            melhorValor = valorAtual;
+            int x;
+            for (x=0;x<g->numVertices;x++) melhorCiclo[x] = cicloAtual[x];
+          }
+          valorAtual -= pesoAresta(g, elemenAtual->vertice, 0);
+        }
+      }else{
+        caixeiroAux(g, elemenAtual->vertice, numVisitados+1);
+      }
+      valorAtual -= elemenAtual->peso;
+    }
+    elemenAtual = elemenAtual->prox;
+  }
   
 }
 
