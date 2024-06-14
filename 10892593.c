@@ -327,21 +327,92 @@ Peso melhorValor;
 Peso valorAtual;
 
 
+void caixeiroRecurcivo(Grafo*g, int atual, int numVisitados) {
+  ElemLista* elemenAtual = g->A[atual];
+
+  visitado[atual] = true;
+
+  while (elemenAtual){
+    if(!visitado[elemenAtual->vertice]) {
+      valorAtual += elemenAtual->peso;
+      cicloAtual[numVisitados] = elemenAtual->vertice;
+      caixeiroRecurcivo(g, elemenAtual->vertice, numVisitados+1);
+    } else {
+      bool todosVisitados = true;
+      int i;
+      for(i=0;i<g->numVertices;i++) {
+        if(!visitado[i]) {
+          todosVisitados=false;
+          break;
+        }
+      }
+      if (todosVisitados)
+      {
+        if(arestaExiste(g, atual, 0)) {
+          valorAtual += pesoAresta(g, atual, 0);
+          cicloAtual[numVisitados] = atual;
+
+          if (valorAtual < melhorValor)
+          {
+            melhorValor = valorAtual;
+            int x;
+            for (x=0;x<g->numVertices;x++) melhorCiclo[x] = cicloAtual[x];
+          }
+          
+        } else {
+          visitado[atual] = false;
+
+        }
+        break;
+      }
+      if (todosVisitados)
+      {
+        break;
+      }
+      
+    }
+    elemenAtual = elemenAtual->prox;
+  }
+}
+
 /* Funcao auxiliar, potencialmente recursiva, que ira resolver
    o problema do caixeiro viajante.
    Esta funcao eh inicialmente chamada pela funcao caixeiroViajante */
 void caixeiroAux(Grafo*g, int atual, int numVisitados){
   if (g->numArestas==1 && g->numVertices==1){
-    visitado[atual] = true;
     melhorValor = g->A[atual]->peso;
     melhorCiclo[atual] = g->A[atual]->vertice;
     return;
   }
-  visitado[atual] = true;
-  ElemLista* elemenAtual = g->A[atual];
+  int i;
+  for (i = 1; i < g->numVertices; i++) {
+    if (arestaExiste(g, atual, i))
+    {
+      if (i==9)
+      {
+        //printf("breakpoint");
+      }
+      
+      valorAtual = pesoAresta(g, atual, i);
+      //printf("\nValor atual: %.2f\n", valorAtual);
+      cicloAtual[1] = i;
+      
+      caixeiroRecurcivo(g, i, 2);
+    }
+
+    printf("Custo parcial para i = %i encontrado: %.2f\n", i, valorAtual); 
+    exibeCiclo(cicloAtual, g->numVertices);
+    int x;
+    for (x=1;x<g->numVertices;x++) {
+      visitado[x] = false;
+      cicloAtual[x] = -1;
+    }
+    valorAtual = INFINITO;
+  }
   
-  while (elemenAtual){
-    if (!visitado[elemenAtual->vertice]){
+
+  /*while (elemenAtual){
+    if (!visitado[elemenAtual->vertice]) {
       valorAtual += elemenAtual->peso;
       cicloAtual[numVisitados] = elemenAtual->vertice;
       if (numVisitados == g->numVertices-1){
@@ -361,7 +432,7 @@ void caixeiroAux(Grafo*g, int atual, int numVisitados){
     }
     elemenAtual = elemenAtual->prox;
   }
-  
+  visitado[atual] = true;*/
 }
 
 
@@ -391,7 +462,7 @@ bool caixeiroViajante(Grafo* g){
 /* Funcao main para realizar alguns testes iniciais sobre o EP 2.
 */
 int main() {
-  Grafo g1;
+  /*Grafo g1;
   inicializaGrafo(&g1, 1);
   printf("\n##### Primeiro problema: uma cidade e nenhuma aresta (nao ha solucao).\n");
   exibeGrafo(&g1);
@@ -461,7 +532,7 @@ int main() {
     printf("Custo encontrado: %.2f\n", melhorValor); 
     exibeCiclo(melhorCiclo, g4.numVertices);
   }else printf("Nenhuma solucao foi encontrada.\n");
-
+*/
 
   printf("\n##### Setimo problema: grafo gerado aleatoriamente (pode ou nao ter solucoes).\n");
   Grafo* g5 = criaGrafoAleatorio(10, 30);
